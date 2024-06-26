@@ -1,0 +1,11 @@
+
+.material-icons, .material-icons-outlined, .material-icons-round, .material-icons-sharp, .material-icons-two-tone, .mdi, .mdi-outlined, .mdi-round, .mdi-sharp, .mdi-two-tone {
+    line-height: .5;
+}
+
+.mdi-radiobox-blank:before {
+    content: "\e836";
+}
+.mdi-radiobox-marked:before {
+    content: "\e837";
+}

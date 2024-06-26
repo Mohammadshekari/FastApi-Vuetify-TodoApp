@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Todo App with FastApi & Vuetify</title>
+	<link rel="stylesheet" href="static/css/material-icons.min.css">
+	<link rel="stylesheet" href="static/css/vuetify.min.css">
+	<link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+<div id="app">
+	<v-responsive class="rounded">
+
+		<v-app :theme="theme" scroll-behavior="hide collapse elevate">
+			<v-app-bar class="px-3" color="primary" title="Todo App">
+				<v-spacer></v-spacer>
+				<v-btn
+						:prepend-icon="theme === 'light' ? 'mdi-wb-sunny' : 'mdi-nightlight-round'"
+						text="Toggle Theme"
+						slim
+						@click="toggleTheme"
+				></v-btn>
+			</v-app-bar>
+
+			<v-main>
+				<v-container>
+					<v-snackbar v-model="showSnackbar" :color="snackbarColor"
+								:timeout="2000">
+						<span v-html="snackbarText"></span>
+						<template v-slot:actions>
+							<v-btn icon="mdi-close" size="small"
+								   @click="showSnackbar = false"
+							>
+							</v-btn>
+						</template>
+					</v-snackbar>
+					<v-card class="mx-auto" hover>
+						<v-expansion-panels color="success" v-model="addPanel">
+							<v-expansion-panel>
+								<v-expansion-panel-title disable-icon-rotate>
+									Add new Todo
+									<template v-slot:actions>
+										<v-icon color="white" :icon="addPanel === 0 ? 'mdi-close' : 'mdi-add-box'">
+										</v-icon>
+									</template>
+								</v-expansion-panel-title>
+								<v-expansion-panel-text>
+									<v-form validate-on="submit lazy" @submit.prevent="submit">
+										<v-container>
+											<v-row>
+												<v-col sm="5" cols="12">
+													<v-text-field class="mb-3"
+															v-model="title"
+															:counter="50"
+															label="Todo Title"
+															placeholder="Write something you want to remember..."
+															:rules="rules"
+													></v-text-field>
+													<v-text-field class="mb-3"
+															v-model="title"
+															:counter="50"
+															label="Todo Person"
+															placeholder="This todo related to..."
+															:rules="rules"
+													></v-text-field>
+													<v-textarea
+															clear-icon="mdi-close-circle"
+															placeholder="Some description you want to write..."
+															label="Todo Description"
+															v-model="description"
+															:counter="300"
+															clearable
+															required
+													></v-textarea>
+													<div class="p-5">
+														<v-radio-group>
+															<v-radio label="Critical" color="red" value="one"></v-radio>
+															<v-radio label="Normal" color="warning" value="two"></v-radio>
+															<v-radio label="Never mind" color="success" value="three"></v-radio>
+														</v-radio-group>
+													</div>
+												</v-col>
+												<v-col sm="7" cols="12" class="justify-center d-flex">
+													<v-date-picker width="100%" max-width="350"
+																   :disabled="loadingSubmit"
+																   show-adjacent-months
+																   label="Todo Date"
+																   title="Todo Date"
+																   color="primary"
+																   v-model="date"
+																   :rules="rules"
+													></v-date-picker>
+												</v-col>
+												<v-col cols="12">
+													<v-btn class="w-100" size="large" type="submit" block
+														   :loading="loadingSubmit"
+														   color="primary">Submit Todo
+													</v-btn>
+												</v-col>
+											</v-row>
+										</v-container>
+									</v-form>
+								</v-expansion-panel-text>
+
+							</v-expansion-panel>
+						</v-expansion-panels>
+					</v-card>
+				</v-container>
+			</v-main>
+		</v-app>
+	</v-responsive>
+</div>
+
+<script src="static/js/vue.global.js"></script>
+<script src="static/js/vuetify.min.js"></script>
+<script>
+    const {createApp, ref} = Vue
+    const {createVuetify} = Vuetify
+
+    const vuetify = createVuetify()
+
+    const app = createApp({
+        setup() {
+            const message = ref('Hello vue!')
+            const theme = ref('light')
+            const loadingSubmit = ref(false)
+            const addPanel = ref(0)
+            const date = ref(new Date())
+            const title = ref('')
+            const description = ref('')
+            const level = ref('')
+            const rules = [
+                value => {
+                    if (value) return true
+                    return 'This field is required!'
+                },
+            ]
+
+            function toggleTheme() {
+                theme.value = theme.value === 'light' ? 'dark' : 'light'
+            }
+
+            function updateDate(val) {
+                date.value = val
+                return true
+            }
+
+            function submit(ev) {
+                loadingSubmit.value = true
+                showSnackbar.value = true;
+            }
+
+            const showSnackbar = ref(true)
+            const snackbarText = ref(`Hi, Welcome to Todo App`)
+            const snackbarColor = ref(`success`)
+            return {
+                theme,
+                message,
+                toggleTheme,
+                date,
+                updateDate,
+                addPanel,
+                title,
+                description,
+                rules,
+                loadingSubmit,
+                submit,
+                showSnackbar,
+                snackbarText,
+                snackbarColor,
+                level,
+            }
+        }
+    })
+    app.use(vuetify).mount('#app')
+
+</script>
+</body>
+</html>
