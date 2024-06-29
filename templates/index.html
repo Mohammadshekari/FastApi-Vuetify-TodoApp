@@ -34,13 +34,14 @@
 							</v-btn>
 						</template>
 					</v-snackbar>
-					<v-card class="mx-auto" hover>
+					<v-card class="mx-auto mb-5" hover>
 						<v-expansion-panels color="success" v-model="addPanel">
 							<v-expansion-panel>
-								<v-expansion-panel-title disable-icon-rotate>
+								<v-expansion-panel-title disable-icon-rotate class="text-h6 ">
 									Add new Todo
 									<template v-slot:actions>
-										<v-icon color="white" :icon="addPanel === 0 ? 'mdi-close' : 'mdi-add-box'">
+										<v-icon color="white" size="small"
+												:icon="addPanel === 0 ? 'mdi-close' : 'mdi-add-box'">
 										</v-icon>
 									</template>
 								</v-expansion-panel-title>
@@ -50,18 +51,18 @@
 											<v-row>
 												<v-col sm="5" cols="12">
 													<v-text-field class="mb-3"
-															v-model="title"
-															:counter="50"
-															label="Todo Title"
-															placeholder="Write something you want to remember..."
-															:rules="rules"
+																  v-model="title"
+																  :counter="50"
+																  label="Todo Title"
+																  placeholder="Write something you want to remember..."
+																  :rules="rules"
 													></v-text-field>
 													<v-text-field class="mb-3"
-															v-model="title"
-															:counter="50"
-															label="Todo Person"
-															placeholder="This todo related to..."
-															:rules="rules"
+																  v-model="person"
+																  :counter="50"
+																  label="Todo Person"
+																  placeholder="This todo related to..."
+																  :rules="rules"
 													></v-text-field>
 													<v-textarea
 															clear-icon="mdi-close-circle"
@@ -73,16 +74,19 @@
 															required
 													></v-textarea>
 													<div class="p-5">
-														<v-radio-group>
-															<v-radio label="Critical" color="red" value="one"></v-radio>
-															<v-radio label="Normal" color="warning" value="two"></v-radio>
-															<v-radio label="Never mind" color="success" value="three"></v-radio>
+														<v-radio-group v-model="level">
+															<v-radio label="Critical" color="red"
+																	 value="critical"></v-radio>
+															<v-radio label="Normal" color="warning"
+																	 value="normal"></v-radio>
+															<v-radio label="Low" color="success" value="low"></v-radio>
 														</v-radio-group>
 													</div>
 												</v-col>
 												<v-col sm="7" cols="12" class="justify-center d-flex">
 													<v-date-picker width="100%" max-width="350"
 																   :disabled="loadingSubmit"
+																   class="border"
 																   show-adjacent-months
 																   label="Todo Date"
 																   title="Todo Date"
@@ -94,7 +98,7 @@
 												<v-col cols="12">
 													<v-btn class="w-100" size="large" type="submit" block
 														   :loading="loadingSubmit"
-														   color="primary">Submit Todo
+														   color="success">Submit Todo
 													</v-btn>
 												</v-col>
 											</v-row>
@@ -104,6 +108,89 @@
 
 							</v-expansion-panel>
 						</v-expansion-panels>
+					</v-card>
+					<v-card class="mx-auto mb-5" v-if="todos.length">
+						<v-card-title class="d-flex align-center bg-primary">
+							<v-icon icon="mdi-list"></v-icon> &nbsp;
+							My Todos
+							<v-spacer></v-spacer>
+							<v-text-field
+									v-model="search"
+									density="compact"
+									label="Search"
+									prepend-inner-icon="mdi-search"
+									variant="solo-filled"
+									flat
+									hide-details
+									single-line
+							></v-text-field>
+						</v-card-title>
+
+						<v-divider></v-divider>
+						<v-data-table :loading="tableLoading" v-model:search="search" :items="todos" :headers="headers"
+									  v-model="selected"
+									  show-select>
+							<template v-slot:item.rating="{ item }">
+								<v-rating
+										:model-value="item.rating"
+										color="orange-darken-2"
+										density="compact"
+										size="small"
+										readonly
+								></v-rating>
+							</template>
+							<template v-slot:item.title="{ item }">
+								<strong v-html="item.title"></strong>
+							</template>
+							<template v-slot:item.date="{ item }">
+								<div class="text-no-wrap" v-if="!item.completed" v-html="item.date"></div>
+								<v-icon icon="mdi-check" color="success" v-else></v-icon>
+							</template>
+							<template v-slot:item.level="{ item }">
+								<div class="text-center">
+									<v-chip
+											:color="getTodoColor(item.level)"
+											:text="item.level"
+											class="text-uppercase w-100 text-center d-flex justify-center"
+											size="small"
+											label
+									></v-chip>
+								</div>
+							</template>
+							<template v-slot:item.action="{ item }">
+								<div class="text-no-wrap">
+									<v-btn @click.prevent="deleteTodo(item)" rounded="lg" icon="mdi-delete"
+										   variant="tonal" size="x-small"
+										   color="red"></v-btn>
+									<v-btn @click.prevent="showDetail(item)" rounded="lg" class="ml-1" icon="mdi-info"
+										   variant="tonal" size="x-small" color="info"></v-btn>
+									<!--									<v-btn rounded="lg" class="ml-1" icon="mdi-edit" variant="tonal" size="x-small" color="warning"></v-btn>-->
+									<v-btn @click.prevent="completeTodo(item)" :disabled="item.completed" rounded="lg"
+										   class="ml-1" icon="mdi-check"
+										   variant="tonal" size="x-small"
+										   color="success"></v-btn>
+								</div>
+							</template>
+						</v-data-table>
+						<v-card-text class="pt-0" v-if="selected.length">
+							<v-btn color="success" prepend-icon="mdi-check" class="mr-2"
+								   @click.prevent="pluralAction('complete')">
+								Complete
+								<span v-html="selected.length" class="mx-1"></span>
+								todos
+							</v-btn>
+							<v-btn color="warning" prepend-icon="mdi-redo" class="mr-2"
+								   @click.prevent="pluralAction('not_completed')">
+								UnComplete
+								<span v-html="selected.length" class="mx-1"></span>
+								todos
+							</v-btn>
+							<v-btn color="red" prepend-icon="mdi-delete" @click.prevent="pluralAction('delete')">
+								Remove
+								<span v-html="selected.length" class="mx-1"></span>
+								todos
+							</v-btn>
+						</v-card-text>
 					</v-card>
 				</v-container>
 			</v-main>
@@ -124,11 +211,46 @@
             const message = ref('Hello vue!')
             const theme = ref('light')
             const loadingSubmit = ref(false)
-            const addPanel = ref(0)
+            const addPanel = ref(1)
             const date = ref(new Date())
             const title = ref('')
+            const tableLoading = ref(true)
             const description = ref('')
             const level = ref('')
+            const search = ref('')
+            const todos = ref([])
+            const selected = ref([])
+            const headers = ref([
+                {title: 'Title', key: 'title'},
+                {title: 'Person', key: 'person',},
+                // {title: 'Description', key: 'description'},
+                {title: 'Level', key: 'level', align: 'center'},
+                {title: 'Date', key: 'date', align: 'center'},
+                {title: 'Action', key: 'action', align: 'center', sortable: false},
+            ])
+            const getTodoColor = (level) => {
+                return {
+                    'low': 'success',
+                    'normal': 'warning',
+                    'critical': 'error',
+                }[level]
+            }
+            const showDetail = (todo) => {
+                showSnackbar.value = true;
+                snackbarText.value = todo.description;
+                snackbarColor.value = 'info';
+            }
+
+            fetch("/list", {
+                method: "GET",
+                // body: JSON.stringify({username: "example"}),
+                // headers: myHeaders,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    todos.value = data;
+                    tableLoading.value = false
+                })
             const rules = [
                 value => {
                     if (value) return true
@@ -143,6 +265,79 @@
             function updateDate(val) {
                 date.value = val
                 return true
+            }
+
+            function deleteTodo(item) {
+                fetch("/delete/" + item.id, {
+                    method: "DELETE",
+                    // body: JSON.stringify({username: "example"}),
+                    // headers: myHeaders,
+                })
+                    .then(response => {
+                        showSnackbar.value = true;
+                        if (response.ok) {
+                            todos.value = todos.value.filter(todo => todo.id !== item.id)
+                            snackbarText.value = "Todo removed successfully!";
+                            snackbarColor.value = 'success';
+                        } else {
+                            snackbarText.value = response.statusText;
+                            snackbarColor.value = 'error';
+                        }
+                    })
+            }
+
+            function completeTodo(item) {
+                fetch("/complete/" + item.id, {
+                    method: "POST",
+                    // body: JSON.stringify({username: "example"}),
+                    // headers: myHeaders,
+                })
+                    .then(response => {
+                        showSnackbar.value = true;
+                        if (response.ok) {
+                            todos.value = todos.value.map(todo => {
+                                if (todo.id === item.id)
+                                    todo.completed = true;
+                                return todo
+                            })
+                            snackbarText.value = "Todo completed successfully!";
+                            snackbarColor.value = 'success';
+                        } else {
+                            snackbarText.value = response.statusText;
+                            snackbarColor.value = 'error';
+                        }
+                    })
+            }
+
+            function pluralAction(action) {
+                tableLoading.value = true
+                fetch("/plural", {
+                    headers: {
+                        "accept": "application/json",
+                        "content-type": "application/json",
+                    },
+                    method: "POST",
+                    body: JSON.stringify({
+                        'ids': [...selected.value],
+                        'action': action
+                    }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('data', data)
+                        showSnackbar.value = true;
+                        snackbarText.value = 'Action done successfully!'
+                        snackbarColor.value = 'success';
+                        todos.value = data;
+                        selected.value = []
+                        tableLoading.value = false;
+                    })
+                    .catch(error => {
+                        showSnackbar.value = true;
+                        snackbarText.value = error.statusText;
+                        snackbarColor.value = 'error';
+                        tableLoading.value = false;
+                    })
             }
 
             function submit(ev) {
@@ -169,6 +364,16 @@
                 snackbarText,
                 snackbarColor,
                 level,
+                todos,
+                search,
+                headers,
+                selected,
+                tableLoading,
+                getTodoColor,
+                completeTodo,
+                showDetail,
+                pluralAction,
+                deleteTodo,
             }
         }
     })

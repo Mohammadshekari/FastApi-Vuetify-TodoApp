@@ -2,10 +2,32 @@
 .material-icons, .material-icons-outlined, .material-icons-round, .material-icons-sharp, .material-icons-two-tone, .mdi, .mdi-outlined, .mdi-round, .mdi-sharp, .mdi-two-tone {
     line-height: .5;
 }
+.v-data-table .v-table__wrapper>table tbody>tr>th:not(.v-data-table__th--sorted) .v-data-table-header__sort-icon, .v-data-table .v-table__wrapper>table>thead>tr>th:not(.v-data-table__th--sorted) .v-data-table-header__sort-icon{
+    display: none;
+}
 
 .mdi-radiobox-blank:before {
     content: "\e836";
 }
+
 .mdi-radiobox-marked:before {
     content: "\e837";
+}
+
+.mdi-checkbox-marked:before {
+    content: "\e834";
+}
+
+.mdi-checkbox-blank-outline:before {
+    content: "\e835";
+}
+
+.mdi-minus-box:before {
+    content: "\e909";
+}
+.mdi-arrow-up:before {
+    content: "\e5c7";
+}
+.mdi-arrow-down:before {
+    content: "\e5c5";
 }
