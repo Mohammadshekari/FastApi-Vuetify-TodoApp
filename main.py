@@ -76,7 +76,7 @@ async def get_todos():
 async def add_todo_item(item: TodoItem):
     item.id = todo_items[-1].id + 1
     todo_items.append(item)
-    return {"message": "Todo item added successfully"}
+    return item
 
 
 @app.delete("/delete/{item_id}")

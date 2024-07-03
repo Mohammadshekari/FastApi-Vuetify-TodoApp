@@ -3,6 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Todo App with FastApi & Vuetify</title>
+	<meta name="author" content="BadiDesign Mohammad Shekari">
 	<link rel="stylesheet" href="static/css/material-icons.min.css">
 	<link rel="stylesheet" href="static/css/vuetify.min.css">
 	<link rel="stylesheet" href="static/css/style.css">
@@ -46,7 +47,7 @@
 									</template>
 								</v-expansion-panel-title>
 								<v-expansion-panel-text>
-									<v-form validate-on="submit lazy" @submit.prevent="submit">
+									<v-form ref="todoForm" validate-on="submit lazy" @submit.prevent="submit">
 										<v-container>
 											<v-row>
 												<v-col sm="5" cols="12">
@@ -210,10 +211,12 @@
         setup() {
             const message = ref('Hello vue!')
             const theme = ref('light')
+            const todoForm = ref()
             const loadingSubmit = ref(false)
             const addPanel = ref(1)
             const date = ref(new Date())
             const title = ref('')
+            const person = ref('')
             const tableLoading = ref(true)
             const description = ref('')
             const level = ref('')
@@ -341,8 +344,49 @@
             }
 
             function submit(ev) {
-                loadingSubmit.value = true
-                showSnackbar.value = true;
+                todoForm.value?.validate().then(({valid: isValid}) => {
+                    if (isValid) {
+                        tableLoading.value = true
+                        fetch("/add", {
+                            headers: {
+                                "accept": "application/json",
+                                "content-type": "application/json",
+                            },
+                            method: "POST",
+                            body: JSON.stringify({
+                                'id': 0,
+                                'title': title.value,
+                                'description': description.value,
+                                'level': level.value,
+                                'person': person.value,
+                                'completed': false,
+                                'date': date.value.toISOString().split('T')[0],
+                            }),
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('data', data)
+                                showSnackbar.value = true;
+                                snackbarText.value = 'Todo submitted successfully!'
+                                snackbarColor.value = 'success';
+                                todos.value.push(data);
+                                selected.value = []
+                                title.value = ''
+                                person.value = ''
+                                description.value = ''
+                                level.value = ''
+                                date.value = new Date()
+                                tableLoading.value = false;
+                            })
+                            .catch(error => {
+                                showSnackbar.value = true;
+                                snackbarText.value = error.statusText;
+                                snackbarColor.value = 'error';
+                                tableLoading.value = false;
+                            })
+                    }
+                })
+
             }
 
             const showSnackbar = ref(true)
@@ -356,6 +400,7 @@
                 updateDate,
                 addPanel,
                 title,
+                person,
                 description,
                 rules,
                 loadingSubmit,
@@ -374,6 +419,7 @@
                 showDetail,
                 pluralAction,
                 deleteTodo,
+                todoForm,
             }
         }
     })
