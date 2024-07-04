@@ -3,7 +3,7 @@
 
 This project is a simple Todo application built with FastAPI for the backend and Vuetify (via CDN) for the frontend. The frontend is rendered using FastAPI Templates.
 
-<img src="https://github.com/Mohammadshekari/FastApi-Vuetify-TodoApp/blob/main/screenshots/add-todo-pic.png?raw=true" width="600">
+<img src="https://github.com/Mohammadshekari/FastApi-Vuetify-TodoApp/blob/main/screenshots/todo.jpg?raw=true" width="800">
 
 ## Table of Contents
 
